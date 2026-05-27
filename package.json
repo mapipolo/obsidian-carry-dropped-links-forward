@@ -1,0 +1,23 @@
+{
+  "name": "obsidian-carry-dropped-links-forward",
+  "version": "0.1.0",
+  "description": "Carry Dropped Links Forward — Obsidian Plugin",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@codemirror/state": "^6.4.1",
+    "@codemirror/view": "^6.26.3",
+    "@types/node": "^16.18.0",
+    "builtin-modules": "^3.3.0",
+    "esbuild": "0.21.5",
+    "obsidian": "latest",
+    "tslib": "2.6.2",
+    "typescript": "5.4.5",
+    "vitest": "^1.6.0"
+  }
+}

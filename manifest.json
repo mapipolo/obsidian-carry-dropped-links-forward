@@ -1,0 +1,10 @@
+{
+  "id": "carry-dropped-links-forward",
+  "name": "Carry Dropped Links Forward",
+  "version": "0.1.0",
+  "minAppVersion": "1.0.0",
+  "description": "If you delete the only linked occurrence of a term, this plugin will \"carry the link forward\" to the new first occurrence of that same term in the note.",
+  "author": "Michael Pipolo",
+  "authorUrl": "",
+  "isDesktopOnly": false
+}
