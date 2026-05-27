@@ -14,8 +14,6 @@ export interface PluginSettings {
   skipFrontmatter: boolean;
   /** Don't match or insert links inside `inline code` spans */
   skipInlineCode: boolean;
-  /** Format for the inserted carried-forward link */
-  linkFormat: "wikilink" | "markdown";
   /** Whether the plain-text search is case-sensitive */
   caseSensitive: boolean;
   /**
@@ -33,7 +31,6 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   debounceDelayMs: 500,
   skipFrontmatter: true,
   skipInlineCode: true,
-  linkFormat: "wikilink",
   caseSensitive: true,
   caseInsensitiveReplacement: "use-note-name",
 };

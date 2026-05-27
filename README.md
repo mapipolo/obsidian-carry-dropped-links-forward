@@ -41,10 +41,12 @@ Open **Settings → Carry Dropped Links Forward** to configure:
 |---------|---------|-------------|
 | **Timing** | Immediate | Apply the carry-forward as soon as you edit, or wait until you stop typing (debounced). |
 | **Debounce delay** | 500 ms | How long to wait after the last keystroke before acting. Only shown when timing is set to Debounced. |
-| **Link format** | Wikilink `[[…]]` | Whether to insert a wikilink or a Markdown hyperlink `[text](path)`. |
 | **Case-sensitive search** | On | When on, `Claude Shannon` only matches text with that exact capitalisation. |
+| **Case-insensitive replacement style** | Use note name | Only shown when case-sensitive search is off. Controls whether the inserted link uses the note's name (`[[Cognitive load]]`) or preserves the found casing as an alias (`[[Cognitive load\|cognitive load]]`). |
 | **Skip YAML frontmatter** | On | Don't insert links into the `---` frontmatter block. |
 | **Skip inline code** | On | Don't insert links inside `` `inline code` `` spans. |
+
+> **Link format** is not a separate setting — the plugin respects your vault-wide choice under **Settings → Files and Links → Use \[\[Wikilinks\]\]** automatically.
 
 Fenced code blocks (` ``` ` and `~~~`) are always skipped and are not configurable.
 

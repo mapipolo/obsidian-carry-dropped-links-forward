@@ -8,7 +8,17 @@
 import { ViewPlugin, ViewUpdate } from "@codemirror/view";
 import { Annotation, Transaction } from "@codemirror/state";
 import { computeCarryForwardEdits, diffDroppedTargets } from "./link-manager";
-import type { PluginSettings } from "./settings";
+import type { Settings } from "./link-manager";
+
+/**
+ * All settings the extension needs: the carry-forward logic settings (Settings)
+ * plus the timing fields that live in PluginSettings.  Defined here so
+ * editor-extension.ts doesn't need to import from settings.ts.
+ */
+export interface ExtensionSettings extends Settings {
+  timing: "immediate" | "debounced";
+  debounceDelayMs: number;
+}
 
 /**
  * Annotation used to tag carry-forward transactions so the plugin can
@@ -24,7 +34,7 @@ const carryForwardAnnotation = Annotation.define<boolean>();
  *                     without needing to rebuild the extension on every change.
  */
 export function createCarryLinksExtension(
-  getSettings: () => PluginSettings
+  getSettings: () => ExtensionSettings
 ) {
   return ViewPlugin.fromClass(
     class {

@@ -6,6 +6,7 @@
 
 import { App, Plugin, PluginSettingTab, Setting } from "obsidian";
 import { createCarryLinksExtension } from "./editor-extension";
+import type { ExtensionSettings } from "./editor-extension";
 import { PluginSettings, DEFAULT_SETTINGS } from "./settings";
 
 export default class CarryDroppedLinksPlugin extends Plugin {
@@ -14,9 +15,18 @@ export default class CarryDroppedLinksPlugin extends Plugin {
   async onload(): Promise<void> {
     await this.loadSettings();
 
-    // Register the CodeMirror extension that watches for dropped links
+    // Register the CodeMirror extension that watches for dropped links.
+    // linkFormat is derived dynamically from Obsidian's global "Use [[Wikilinks]]"
+    // setting (Files & Links → Use [[Wikilinks]]) so the plugin respects whatever
+    // the user has already chosen vault-wide.
     this.registerEditorExtension(
-      createCarryLinksExtension(() => this.settings)
+      createCarryLinksExtension((): ExtensionSettings => ({
+        ...this.settings,
+        linkFormat:
+          (this.app.vault as any).getConfig("useMarkdownLinks") === true
+            ? "markdown"
+            : "wikilink",
+      }))
     );
 
     // Add settings tab
@@ -88,29 +98,13 @@ class CarryDroppedLinksSettingTab extends PluginSettingTab {
         );
     }
 
-    // ── Link format ───────────────────────────────────────────────────────────
-    new Setting(containerEl)
-      .setName("Link format")
-      .setDesc(
-        "The format used when inserting a carried-forward link."
-      )
-      .addDropdown((drop) =>
-        drop
-          .addOption("wikilink", "Wikilink  [[Note]]")
-          .addOption("markdown", "Markdown  [Note](Note)")
-          .setValue(this.plugin.settings.linkFormat)
-          .onChange(async (value) => {
-            this.plugin.settings.linkFormat = value as "wikilink" | "markdown";
-            await this.plugin.saveSettings();
-          })
-      );
-
     // ── Case sensitivity ──────────────────────────────────────────────────────
     new Setting(containerEl)
       .setName("Case-sensitive search")
       .setDesc(
-        'When enabled, "Claude Shannon" only matches text with that exact ' +
-          'capitalisation. When disabled, "claude shannon" is also matched.'
+        'When looking to reapply a link, look only for strings with exactly the same case as the deleted link. '
+        + 'When off, deleting a link "[[Python]]" will cause the first occurrence of the string '
+        + '"python" to be linkified.'
       )
       .addToggle((toggle) =>
         toggle
@@ -127,15 +121,12 @@ class CarryDroppedLinksSettingTab extends PluginSettingTab {
       new Setting(containerEl)
         .setName("Case-insensitive replacement style")
         .setDesc(
-          "When the found text has different capitalisation than the note name, " +
-            "controls how the link is inserted.\n\n" +
-            "Use note name — [[Cognitive load]] (replaces with the note's name)\n" +
-            "Preserve found text — [[Cognitive load|cognitive load]] (alias keeps the text as written)"
+          "Controls how the new link should appear if its text is cased differently than the deleted link."
         )
         .addDropdown((drop) =>
           drop
             .addOption("use-note-name", "Use note name")
-            .addOption("use-found-text", "Preserve found text (alias)")
+            .addOption("use-found-text", "Preserve text case")
             .setValue(this.plugin.settings.caseInsensitiveReplacement)
             .onChange(async (value) => {
               this.plugin.settings.caseInsensitiveReplacement = value as
