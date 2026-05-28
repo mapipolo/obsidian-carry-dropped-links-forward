@@ -10,8 +10,11 @@
     "test": "vitest run",
     "test:watch": "vitest"
   },
+  "overrides": {
+    "@codemirror/state": "6.6.0"
+  },
   "devDependencies": {
-    "@codemirror/state": "6.5.0",
+    "@codemirror/state": "6.6.0",
     "@codemirror/view": "^6.26.3",
     "@types/node": "^20.0.0",
     "@typescript-eslint/parser": "^8.0.0",

@@ -35,7 +35,7 @@ var import_state = require("@codemirror/state");
 // src/link-manager.ts
 function extractWikiLinks(text) {
   const results = [];
-  const re = /!?\[\[([^\[\]]+)\]\]/g;
+  const re = /!?\[\[([^[\]]+)\]\]/g;
   let match;
   while ((match = re.exec(text)) !== null) {
     const raw = match[0];
@@ -121,7 +121,7 @@ function computeSkipRanges(text, settings) {
     }
   }
   {
-    const re = /\[([^\[\]]*)\]\(([^)]*)\)/g;
+    const re = /\[([^[\]]*)\]\(([^)]*)\)/g;
     let m;
     while ((m = re.exec(text)) !== null) {
       ranges.push({ start: m.index, end: m.index + m[0].length });
@@ -241,9 +241,9 @@ function createCarryLinksExtension(getSettings) {
           if (this.debounceTimer === null) {
             this.burstStartDoc = oldDoc;
           } else {
-            clearTimeout(this.debounceTimer);
+            window.clearTimeout(this.debounceTimer);
           }
-          this.debounceTimer = setTimeout(() => {
+          this.debounceTimer = window.setTimeout(() => {
             this.debounceTimer = null;
             const currentDoc = update.view.state.doc.toString();
             this.applyCarryForward(update, this.burstStartDoc, currentDoc);
@@ -257,7 +257,7 @@ function createCarryLinksExtension(getSettings) {
         const edits = computeCarryForwardEdits(newDoc, droppedTargets, settings);
         if (edits.length === 0) return;
         this.isInserting = true;
-        Promise.resolve().then(() => {
+        window.setTimeout(() => {
           try {
             update.view.dispatch({
               changes: edits.map((e) => ({
@@ -270,7 +270,7 @@ function createCarryLinksExtension(getSettings) {
           } finally {
             this.isInserting = false;
           }
-        });
+        }, 0);
       }
     }
   );
@@ -317,7 +317,6 @@ var CarryDroppedLinksSettingTab = class extends import_obsidian.PluginSettingTab
   display() {
     const { containerEl } = this;
     containerEl.empty();
-    containerEl.createEl("h2", { text: "Carry Dropped Links Forward" });
     new import_obsidian.Setting(containerEl).setName("Timing").setDesc(
       "Whether to carry the link forward immediately on each edit, or wait until you stop typing."
     ).addDropdown(
@@ -359,7 +358,7 @@ var CarryDroppedLinksSettingTab = class extends import_obsidian.PluginSettingTab
         })
       );
     }
-    containerEl.createEl("h3", { text: "Skip zones" });
+    new import_obsidian.Setting(containerEl).setHeading().setName("Skip zones");
     containerEl.createEl("p", {
       text: "Fenced code blocks are always skipped. The options below are additional zones where the plugin will neither search for occurrences nor insert links.",
       cls: "setting-item-description"

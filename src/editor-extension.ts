@@ -34,7 +34,7 @@ export function createCarryLinksExtension(
       /** True while we are dispatching a carry-forward transaction */
       private isInserting = false;
       /** Debounce timer handle */
-      private debounceTimer: ReturnType<typeof window.setTimeout> | null = null;
+      private debounceTimer: number | null = null;
       /** Document snapshot at the start of a debounce burst */
       private burstStartDoc = "";
 
