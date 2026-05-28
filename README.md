@@ -67,7 +67,3 @@ npm run build     # production build
 ```
 
 Tests cover the pure link-management logic in `src/link-manager.ts` and run without any Obsidian API dependency.
-
-## License
-
-[MIT](LICENSE)
