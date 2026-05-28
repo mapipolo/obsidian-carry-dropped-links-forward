@@ -1,10 +1,3 @@
-/**
- * link-manager.ts
- *
- * Pure logic for detecting dropped links and computing carry-forward edits.
- * Zero Obsidian API dependencies — fully testable with Vitest.
- */
-
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface WikiLink {

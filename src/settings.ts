@@ -1,10 +1,3 @@
-/**
- * settings.ts
- *
- * Plugin settings type definition and defaults.
- * PluginSettings structurally satisfies link-manager.ts Settings interface.
- */
-
 export interface PluginSettings {
   /** Whether to apply carry-forward immediately or after a debounce delay */
   timing: "immediate" | "debounced";

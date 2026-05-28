@@ -1,9 +1,3 @@
-/**
- * main.ts
- *
- * Plugin entry point. Registers the editor extension and settings tab.
- */
-
 import { App, Plugin, PluginSettingTab, Setting } from "obsidian";
 import { createCarryLinksExtension } from "./editor-extension";
 import type { ExtensionSettings } from "./editor-extension";
@@ -23,7 +17,7 @@ export default class CarryDroppedLinksPlugin extends Plugin {
       createCarryLinksExtension((): ExtensionSettings => ({
         ...this.settings,
         linkFormat:
-          (this.app.vault as any).getConfig("useMarkdownLinks") === true
+          (this.app.vault as unknown as { getConfig(key: string): unknown }).getConfig("useMarkdownLinks") === true
             ? "markdown"
             : "wikilink",
       }))
@@ -54,8 +48,6 @@ class CarryDroppedLinksSettingTab extends PluginSettingTab {
   display(): void {
     const { containerEl } = this;
     containerEl.empty();
-
-    containerEl.createEl("h2", { text: "Carry Dropped Links Forward" });
 
     // ── Timing ────────────────────────────────────────────────────────────────
     new Setting(containerEl)
@@ -138,7 +130,7 @@ class CarryDroppedLinksSettingTab extends PluginSettingTab {
     }
 
     // ── Skip zones ────────────────────────────────────────────────────────────
-    containerEl.createEl("h3", { text: "Skip zones" });
+    new Setting(containerEl).setHeading().setName("Skip zones");
     containerEl.createEl("p", {
       text:
         "Fenced code blocks are always skipped. The options below are additional " +

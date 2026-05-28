@@ -2,9 +2,8 @@
   "id": "carry-dropped-links-forward",
   "name": "Carry Dropped Links Forward",
   "version": "0.1.0",
-  "minAppVersion": "1.0.0",
+  "minAppVersion": "1.4.0",
   "description": "Relinks terms when you delete the only linked occurrence.",
   "author": "Michael Pipolo",
-  "authorUrl": "",
   "isDesktopOnly": false
 }

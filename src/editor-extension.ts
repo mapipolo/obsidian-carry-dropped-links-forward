@@ -1,10 +1,3 @@
-/**
- * editor-extension.ts
- *
- * CodeMirror 6 ViewPlugin that hooks into editor transactions, detects dropped
- * links, and dispatches carry-forward edits.
- */
-
 import { ViewPlugin, ViewUpdate } from "@codemirror/view";
 import { Annotation, Transaction } from "@codemirror/state";
 import { computeCarryForwardEdits, diffDroppedTargets } from "./link-manager";
@@ -41,7 +34,7 @@ export function createCarryLinksExtension(
       /** True while we are dispatching a carry-forward transaction */
       private isInserting = false;
       /** Debounce timer handle */
-      private debounceTimer: ReturnType<typeof setTimeout> | null = null;
+      private debounceTimer: ReturnType<typeof activeWindow.setTimeout> | null = null;
       /** Document snapshot at the start of a debounce burst */
       private burstStartDoc = "";
 
@@ -87,10 +80,10 @@ export function createCarryLinksExtension(
             // First edit in this burst — snapshot the pre-edit state
             this.burstStartDoc = oldDoc;
           } else {
-            clearTimeout(this.debounceTimer);
+            activeWindow.clearTimeout(this.debounceTimer);
           }
 
-          this.debounceTimer = setTimeout(() => {
+          this.debounceTimer = activeWindow.setTimeout(() => {
             this.debounceTimer = null;
             const currentDoc = update.view.state.doc.toString();
             this.applyCarryForward(update, this.burstStartDoc, currentDoc);
@@ -110,10 +103,10 @@ export function createCarryLinksExtension(
         const edits = computeCarryForwardEdits(newDoc, droppedTargets, settings);
         if (edits.length === 0) return;
 
-        // Defer the dispatch to the next microtask so we're outside the current
+        // Defer the dispatch to the next task so we're outside the current
         // CM update cycle, preventing synchronous re-entrant updates.
         this.isInserting = true;
-        Promise.resolve().then(() => {
+        activeWindow.setTimeout(() => {
           try {
             update.view.dispatch({
               changes: edits.map((e) => ({
@@ -126,7 +119,7 @@ export function createCarryLinksExtension(
           } finally {
             this.isInserting = false;
           }
-        });
+        }, 0);
       }
     }
   );
