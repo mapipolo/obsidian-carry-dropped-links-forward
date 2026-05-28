@@ -11,9 +11,9 @@
     "test:watch": "vitest"
   },
   "devDependencies": {
-    "@codemirror/state": "^6.4.1",
+    "@codemirror/state": "6.5.0",
     "@codemirror/view": "^6.26.3",
-    "@types/node": "^16.18.0",
+    "@types/node": "^20.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "builtin-modules": "^3.3.0",
     "esbuild": "0.21.5",

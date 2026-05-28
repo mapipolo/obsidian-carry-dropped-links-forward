@@ -69,7 +69,7 @@ export function extractWikiLinks(text: string): WikiLink[] {
   const results: WikiLink[] = [];
   // Match [[ followed by anything except [ or ], then ]]
   // The leading ! (for embeds) is included in raw but not in inner content
-  const re = /!?\[\[([^\[\]]+)\]\]/g;
+  const re = /!?\[\[([^[\]]+)\]\]/g;
   let match: RegExpExecArray | null;
 
   while ((match = re.exec(text)) !== null) {
@@ -230,7 +230,7 @@ export function computeSkipRanges(text: string, settings: Settings): Range[] {
   // ── Existing markdown hyperlinks ──────────────────────────────────────────
   {
     // Matches [display text](url-or-path); does not handle nested brackets
-    const re = /\[([^\[\]]*)\]\(([^)]*)\)/g;
+    const re = /\[([^[\]]*)\]\(([^)]*)\)/g;
     let m: RegExpExecArray | null;
     while ((m = re.exec(text)) !== null) {
       ranges.push({ start: m.index, end: m.index + m[0].length });
@@ -360,7 +360,7 @@ export function formatLink(
   }
 
   // Markdown format
-  const displayText = useFoundText ? matchedText! : basename;
+  const displayText = useFoundText ? matchedText : basename;
   return `[${displayText}](${target})`;
 }
 

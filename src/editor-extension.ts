@@ -34,7 +34,7 @@ export function createCarryLinksExtension(
       /** True while we are dispatching a carry-forward transaction */
       private isInserting = false;
       /** Debounce timer handle */
-      private debounceTimer: ReturnType<typeof activeWindow.setTimeout> | null = null;
+      private debounceTimer: ReturnType<typeof window.setTimeout> | null = null;
       /** Document snapshot at the start of a debounce burst */
       private burstStartDoc = "";
 
@@ -80,10 +80,10 @@ export function createCarryLinksExtension(
             // First edit in this burst — snapshot the pre-edit state
             this.burstStartDoc = oldDoc;
           } else {
-            activeWindow.clearTimeout(this.debounceTimer);
+            window.clearTimeout(this.debounceTimer);
           }
 
-          this.debounceTimer = activeWindow.setTimeout(() => {
+          this.debounceTimer = window.setTimeout(() => {
             this.debounceTimer = null;
             const currentDoc = update.view.state.doc.toString();
             this.applyCarryForward(update, this.burstStartDoc, currentDoc);
@@ -106,7 +106,7 @@ export function createCarryLinksExtension(
         // Defer the dispatch to the next task so we're outside the current
         // CM update cycle, preventing synchronous re-entrant updates.
         this.isInserting = true;
-        activeWindow.setTimeout(() => {
+        window.setTimeout(() => {
           try {
             update.view.dispatch({
               changes: edits.map((e) => ({
