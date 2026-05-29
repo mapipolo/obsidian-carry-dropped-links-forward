@@ -15,7 +15,7 @@ The plugin never touches text inside code blocks, existing links, or markdown hy
 ### Manual installation
 
 1. Download the latest release from the [Releases page](../../releases) — you need `main.js` and `manifest.json`
-2. In your vault, create the folder `.obsidian/plugins/obsidian-carry-dropped-links-forward/`
+2. In your vault, create the folder `.obsidian/plugins/carry-dropped-links-forward/`
 3. Copy `main.js` and `manifest.json` into that folder
 4. Restart Obsidian (or reload plugins via **Settings → Community plugins → Reload plugins**)
 5. Enable the plugin under **Settings → Community plugins**

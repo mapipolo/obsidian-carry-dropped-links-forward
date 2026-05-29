@@ -1,4 +1,4 @@
-import { ViewPlugin, ViewUpdate } from "@codemirror/view";
+import { EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import { Annotation, Transaction } from "@codemirror/state";
 import { computeCarryForwardEdits, diffDroppedTargets } from "./link-manager";
 import type { Settings } from "./link-manager";
@@ -35,8 +35,20 @@ export function createCarryLinksExtension(
       private isInserting = false;
       /** Debounce timer handle */
       private debounceTimer: number | null = null;
+      /** Handle for the deferred dispatch scheduled in applyCarryForward */
+      private deferTimer: number | null = null;
       /** Document snapshot at the start of a debounce burst */
       private burstStartDoc = "";
+
+      // Timers are scoped to the editor's own window so they fire correctly
+      // when the editor lives in a popout window, and so destroy() can cancel
+      // any that are still pending when the view is torn down.
+      constructor(private readonly view: EditorView) {}
+
+      /** The window the editor's DOM belongs to (the popout window, if any). */
+      private get win(): Window {
+        return this.view.dom.ownerDocument.defaultView ?? window;
+      }
 
       update(update: ViewUpdate): void {
         if (!update.docChanged) return;
@@ -80,10 +92,10 @@ export function createCarryLinksExtension(
             // First edit in this burst — snapshot the pre-edit state
             this.burstStartDoc = oldDoc;
           } else {
-            window.clearTimeout(this.debounceTimer);
+            this.win.clearTimeout(this.debounceTimer);
           }
 
-          this.debounceTimer = window.setTimeout(() => {
+          this.debounceTimer = this.win.setTimeout(() => {
             this.debounceTimer = null;
             const currentDoc = update.view.state.doc.toString();
             this.applyCarryForward(update, this.burstStartDoc, currentDoc);
@@ -106,7 +118,8 @@ export function createCarryLinksExtension(
         // Defer the dispatch to the next task so we're outside the current
         // CM update cycle, preventing synchronous re-entrant updates.
         this.isInserting = true;
-        window.setTimeout(() => {
+        this.deferTimer = this.win.setTimeout(() => {
+          this.deferTimer = null;
           try {
             update.view.dispatch({
               changes: edits.map((e) => ({
@@ -120,6 +133,16 @@ export function createCarryLinksExtension(
             this.isInserting = false;
           }
         }, 0);
+      }
+
+      destroy(): void {
+        // Cancel any pending timers so they can't fire against a torn-down view.
+        if (this.debounceTimer !== null) {
+          this.win.clearTimeout(this.debounceTimer);
+        }
+        if (this.deferTimer !== null) {
+          this.win.clearTimeout(this.deferTimer);
+        }
       }
     }
   );

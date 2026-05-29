@@ -16,15 +16,30 @@ export default class CarryDroppedLinksPlugin extends Plugin {
     this.registerEditorExtension(
       createCarryLinksExtension((): ExtensionSettings => ({
         ...this.settings,
-        linkFormat:
-          (this.app.vault as unknown as { getConfig(key: string): unknown }).getConfig("useMarkdownLinks") === true
-            ? "markdown"
-            : "wikilink",
+        linkFormat: this.resolveLinkFormat(),
       }))
     );
 
     // Add settings tab
     this.addSettingTab(new CarryDroppedLinksSettingTab(this.app, this));
+  }
+
+  /**
+   * Read Obsidian's vault-wide "Use [[Wikilinks]]" setting.
+   *
+   * `Vault.getConfig` is an internal, undocumented API, so we read it
+   * defensively: if it is missing or returns anything other than `true`, we
+   * fall back to wikilink format (Obsidian's own default).
+   */
+  private resolveLinkFormat(): "markdown" | "wikilink" {
+    const vault = this.app.vault as unknown as {
+      getConfig?: (key: string) => unknown;
+    };
+    const useMarkdownLinks =
+      typeof vault.getConfig === "function"
+        ? vault.getConfig("useMarkdownLinks")
+        : undefined;
+    return useMarkdownLinks === true ? "markdown" : "wikilink";
   }
 
   async loadSettings(): Promise<void> {

@@ -1,7 +1,7 @@
 {
-  "name": "obsidian-carry-dropped-links-forward",
+  "name": "carry-dropped-links-forward",
   "version": "0.1.0",
-  "description": "Carry Dropped Links Forward — Obsidian Plugin",
+  "description": "Relinks terms when you delete the only linked occurrence.",
   "main": "main.js",
   "scripts": {
     "dev": "node esbuild.config.mjs",
@@ -10,22 +10,31 @@
     "test": "vitest run",
     "test:watch": "vitest"
   },
+  "keywords": [
+    "obsidian",
+    "obsidian-plugin",
+    "links",
+    "wikilinks",
+    "editor"
+  ],
+  "author": "Michael Pipolo <mapipolo@gmail.com>",
+  "license": "MIT",
   "overrides": {
     "@codemirror/state": "6.6.0"
   },
   "devDependencies": {
     "@codemirror/state": "6.6.0",
-    "@codemirror/view": "^6.26.3",
-    "@types/node": "^20.0.0",
-    "@typescript-eslint/parser": "^8.0.0",
-    "builtin-modules": "^3.3.0",
-    "esbuild": "0.21.5",
+    "@codemirror/view": "6.38.6",
+    "@types/node": "^24.0.0",
+    "@typescript-eslint/parser": "^8.60.0",
+    "builtin-modules": "^5.0.0",
+    "esbuild": "^0.25.0",
     "eslint": "^9.0.0",
     "eslint-plugin-obsidianmd": "^0.3.0",
     "obsidian": "latest",
-    "tslib": "2.6.2",
-    "typescript": "5.4.5",
-    "typescript-eslint": "^8.0.0",
-    "vitest": "^1.6.0"
+    "tslib": "^2.8.1",
+    "typescript": "^5.9.0",
+    "typescript-eslint": "^8.60.0",
+    "vitest": "^3.0.0"
   }
 }
