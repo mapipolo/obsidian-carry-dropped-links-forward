@@ -226,6 +226,25 @@ describe("computeSkipRanges — existing links", () => {
   });
 });
 
+describe("computeSkipRanges — raw URLs (issue #1)", () => {
+  it("skips a term that appears inside a bare https URL", () => {
+    const text =
+      "Repo: https://github.com/mapipolo/obsidian-carry-dropped-links-forward";
+    const ranges = computeSkipRanges(text, S);
+    const pos = text.indexOf("github");
+    const inSkip = ranges.some((r) => r.start <= pos && pos < r.end);
+    expect(inSkip).toBe(true);
+  });
+
+  it("skips a term inside a www-style URL", () => {
+    const text = "See www.example.com/Claude%20Shannon for more.";
+    const ranges = computeSkipRanges(text, S);
+    const pos = text.indexOf("Claude");
+    const inSkip = ranges.some((r) => r.start <= pos && pos < r.end);
+    expect(inSkip).toBe(true);
+  });
+});
+
 // ─── findPlainTextOccurrences ─────────────────────────────────────────────────
 
 describe("findPlainTextOccurrences", () => {
@@ -259,10 +278,19 @@ describe("findPlainTextOccurrences", () => {
     expect(positions).toHaveLength(3);
   });
 
-  it("matches substrings (no word-boundary enforcement)", () => {
+  it("matches a term immediately followed by an apostrophe (boundary on punctuation)", () => {
     const text = "Claude Shannon's work was important.";
     const positions = findPlainTextOccurrences(text, "Claude Shannon", [], true);
     expect(positions).toHaveLength(1);
+  });
+
+  it("does not match a term embedded inside a larger word (word-boundary enforcement)", () => {
+    const text = "The Category page lists every Cat.";
+    const positions = findPlainTextOccurrences(text, "Cat", [], true);
+    // "Cat" inside "Category" is skipped; only the standalone "Cat" matches.
+    expect(positions).toHaveLength(1);
+    expect(text.slice(positions[0], positions[0] + 3)).toBe("Cat");
+    expect(positions[0]).toBe(text.lastIndexOf("Cat"));
   });
 
   it("returns empty array when term not found", () => {
@@ -674,6 +702,43 @@ describe("computeSkipRanges — partial wikilink ranges", () => {
     const termPos = text.indexOf("Claude Shannon");
     const covered = ranges.some((r) => r.start <= termPos && termPos < r.end);
     expect(covered).toBe(true);
+  });
+});
+
+// ─── Bug fix: raw URLs (issue #1) ─────────────────────────────────────────────
+//
+// A dropped link's term must never be carried forward onto an occurrence that
+// lives inside a raw URL (e.g. "github" inside https://github.com/...).
+
+describe("computeCarryForwardEdits — raw URLs", () => {
+  it("produces no edit when the only occurrence is inside a raw URL (issue #1)", () => {
+    const afterDoc =
+      "Check the repo at https://github.com/mapipolo/obsidian-carry-dropped-links-forward.";
+    // Case-insensitive so the lowercase "github" in the URL is even a candidate.
+    const edits = computeCarryForwardEdits(afterDoc, ["GitHub"], {
+      ...S,
+      caseSensitive: false,
+    });
+    expect(edits).toHaveLength(0);
+  });
+
+  it("skips the URL occurrence and links a later plain-text occurrence", () => {
+    const afterDoc =
+      "See https://github.com/mapipolo/repo for the GitHub project.";
+    const edits = computeCarryForwardEdits(afterDoc, ["GitHub"], S);
+    expect(edits).toHaveLength(1);
+    const result = applyEdits(afterDoc, edits);
+    // The URL must remain untouched...
+    expect(result).toContain("https://github.com/mapipolo/repo");
+    // ...and the genuine plain-text occurrence should be linked.
+    expect(result).toContain("[[GitHub]] project");
+  });
+
+  it("does not linkify a partial-word match (word-boundary enforcement)", () => {
+    // "Cat" must not be carried forward onto "Category".
+    const afterDoc = "The Category index is large.";
+    const edits = computeCarryForwardEdits(afterDoc, ["Cat"], S);
+    expect(edits).toHaveLength(0);
   });
 });
 

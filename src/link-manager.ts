@@ -237,6 +237,18 @@ export function computeSkipRanges(text: string, settings: Settings): Range[] {
     }
   }
 
+  // ── Bare / raw URLs ───────────────────────────────────────────────────────
+  // A term that happens to appear inside a URL (e.g. "GitHub" inside
+  // https://github.com/...) must never be linkified.  Markdown-style links are
+  // already covered above; this catches plain URLs sitting in body text.
+  {
+    const re = /(?:https?:\/\/|www\.)[^\s<>()[\]]+/gi;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(text)) !== null) {
+      ranges.push({ start: m.index, end: m.index + m[0].length });
+    }
+  }
+
   return ranges;
 }
 
@@ -257,9 +269,32 @@ export function isInSkipRange(
 
 // ─── Occurrence Finding ───────────────────────────────────────────────────────
 
+/** Unicode-aware "word character" test (letters, digits, underscore). */
+function isWordChar(ch: string | undefined): boolean {
+  return ch !== undefined && /[\p{L}\p{N}_]/u.test(ch);
+}
+
+/**
+ * Return true if a match of `needle` at [idx, idx+len) sits on word boundaries,
+ * mirroring regex `\b…\b` semantics: a boundary is only required on a side
+ * whose adjacent needle character is itself a word character.  This prevents
+ * linkifying e.g. "Cat" inside "Category" while still allowing "Claude Shannon"
+ * to match inside "Claude Shannon's".
+ */
+function hasWordBoundaries(text: string, idx: number, needle: string): boolean {
+  if (isWordChar(needle[0]) && isWordChar(text[idx - 1])) return false;
+  const lastNeedleChar = needle[needle.length - 1];
+  const charAfter = text[idx + needle.length];
+  if (isWordChar(lastNeedleChar) && isWordChar(charAfter)) return false;
+  return true;
+}
+
 /**
  * Find all plain-text occurrences of `searchTerm` in `text`, skipping any
  * position that overlaps a range in `skipRanges`.
+ *
+ * Matches are only accepted when they fall on word boundaries, so partial-word
+ * hits (e.g. "Cat" inside "Category") are never linkified.
  *
  * Returns start positions in ascending order.
  */
@@ -279,7 +314,10 @@ export function findPlainTextOccurrences(
   while (searchFrom <= haystack.length - needle.length) {
     const idx = haystack.indexOf(needle, searchFrom);
     if (idx === -1) break;
-    if (!isInSkipRange(idx, needle.length, skipRanges)) {
+    if (
+      !isInSkipRange(idx, needle.length, skipRanges) &&
+      hasWordBoundaries(haystack, idx, needle)
+    ) {
       positions.push(idx);
     }
     searchFrom = idx + 1; // advance by 1 to allow overlapping matches (unlikely but safe)
