@@ -25,5 +25,5 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   skipFrontmatter: true,
   skipInlineCode: true,
   caseSensitive: true,
-  caseInsensitiveReplacement: "use-note-name",
+  caseInsensitiveReplacement: "use-found-text",
 };

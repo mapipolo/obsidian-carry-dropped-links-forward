@@ -540,6 +540,9 @@ describe("computeCarryForwardEdits — case sensitivity", () => {
     const edits = computeCarryForwardEdits(afterDoc, ["Claude Shannon"], {
       ...S,
       caseSensitive: false,
+      // Pin the replacement style so this test targets matching, not the
+      // case-insensitive replacement default (see use-note-name tests below).
+      caseInsensitiveReplacement: "use-note-name",
     });
     expect(edits).toHaveLength(1);
     // The inserted link uses the original target (proper capitalisation)
@@ -574,6 +577,24 @@ describe("formatLink — caseInsensitiveReplacement", () => {
     const settings: Settings = { ...S, caseSensitive: false, caseInsensitiveReplacement: "use-found-text" };
     // target basename is "Cognitive load"; found as "cognitive load"
     expect(formatLink("Concepts/Cognitive load", settings, "cognitive load")).toBe("[[Concepts/Cognitive load|cognitive load]]");
+  });
+});
+
+describe("default caseInsensitiveReplacement (issue #2)", () => {
+  it("defaults to 'use-found-text' (preserve text case)", () => {
+    expect(DEFAULT_SETTINGS.caseInsensitiveReplacement).toBe("use-found-text");
+  });
+
+  it("preserves found casing by default in a case-insensitive match", () => {
+    // Using DEFAULT_SETTINGS, only flipping caseSensitive off: the found
+    // casing should be preserved via an alias, not normalised to the note name.
+    const afterDoc = "with that increase in cognitive load comes an attendant...";
+    const edits = computeCarryForwardEdits(afterDoc, ["Cognitive load"], {
+      ...DEFAULT_SETTINGS,
+      caseSensitive: false,
+    });
+    expect(edits).toHaveLength(1);
+    expect(edits[0].insert).toBe("[[Cognitive load|cognitive load]]");
   });
 });
 

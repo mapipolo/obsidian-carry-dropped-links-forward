@@ -48,7 +48,7 @@ export const DEFAULT_SETTINGS: Settings = {
   skipInlineCode: true,
   linkFormat: "wikilink",
   caseSensitive: true,
-  caseInsensitiveReplacement: "use-note-name",
+  caseInsensitiveReplacement: "use-found-text",
 };
 
 // ─── Parsing ──────────────────────────────────────────────────────────────────
